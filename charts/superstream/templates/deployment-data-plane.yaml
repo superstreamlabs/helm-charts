@@ -1,0 +1,112 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "superstream.fullname" . }}-data-plane
+  labels:
+    {{- include "superstream.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.superstreamAgent.autoscaling.enabled }}
+  replicas: {{ .Values.superstreamAgent.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "superstream.selectorLabels" . | nindent 6 }}-data-plane
+  template:
+    metadata:
+      {{- with .Values.superstreamAgent.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- if .Values.superstreamAgent.releaseDate }}
+        releaseDate: "{{ .Values.superstreamAgent.releaseDate }}"
+        {{- end }}  
+        {{- include "superstream.labels" . | nindent 8 }}
+        {{- include "superstream.selectorLabels" . | nindent 8 }}-data-plane
+    spec:
+      {{- with .Values.global.image.pullSecretNames }}
+      imagePullSecrets:
+      {{- range . }}
+      - name: {{ . | quote }}
+      {{- end }}
+      {{- end }}
+      serviceAccountName: {{ include "superstream.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.superstreamAgent.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}-data-plane
+          {{ include "superstream.image" (merge (pick $.Values "global") .Values.superstreamAgent.image) | nindent 10 }}
+          securityContext:
+            {{- toYaml .Values.superstreamAgent.securityContext | nindent 12 }}
+          ports:
+          - name: data-plane
+            containerPort: {{ .Values.superstreamAgent.service.port }}
+            protocol: TCP
+          env:
+            - name: ENV_NAME
+              value: {{ .Values.global.agentName }}
+            - name: SKIP_LOCAL_AUTHENTICATION
+              value: {{ .Values.global.skipLocalAuthentication | quote }}
+            - name: LOCAL_NATS_SKIP
+              value: 'true'
+            - name: ACTIVATION_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: superstream-creds
+                  key: ACTIVATION_TOKEN
+            {{- if .Values.superstreamAgent.service.enabled }}
+            - name: PORT
+              value: {{ .Values.superstreamAgent.service.port | quote }}
+            {{- end }}
+            - name: CONTROL_PLANE_HOST
+              value: {{ .Values.superstreamAgent.controlPlane.host }}
+            - name: CONTROL_PLANE_PORT
+              value: {{ .Values.superstreamAgent.controlPlane.port | quote }}
+            - name: SYSLOG
+              value: {{ .Values.superstreamAgent.syslog.enabled | quote }}
+            - name: SYSLOG_HOST
+              value: {{ .Values.superstreamAgent.syslog.remoteSyslog }}.{{ include "superstream.namespace" . }}
+            - name: SYSLOG_PROTOCOL
+              value: {{ .Values.superstreamAgent.syslog.protocol }}
+            - name: SYSLOG_PORT
+              value: {{ .Values.superstreamAgent.syslog.port | quote }}
+            {{- if .Values.superstreamAgent.extraEnv }}
+            {{- range .Values.superstreamAgent.extraEnv }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+            {{- end }}
+            {{- end }}               
+          readinessProbe:
+            httpGet:
+              path: /monitoring/status
+              port: 7777
+              scheme: HTTP   
+            initialDelaySeconds: 5
+            periodSeconds: 10 
+          livenessProbe:
+            httpGet:
+              path: /monitoring/status
+              port: 7777
+              scheme: HTTP
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3                         
+          resources:
+            {{- toYaml .Values.superstreamAgent.resources | nindent 12 }}                                                          
+      {{- with .Values.superstreamAgent.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.superstreamAgent.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.superstreamAgent.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+
+
