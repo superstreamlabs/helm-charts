@@ -30,59 +30,7 @@ data:
             critical = 3
             healthy = 1
             problem = 2
-    [[processors.dedup]]
-      namepass = ["superstream_logs"]    
-      fieldinclude = ["message"]  
-      dedup_interval = "10s"   
-    [[processors.starlark]]
-      namepass = [
-        "superstream_logs"
-      ]
-      source = "def apply(metric):\n    unique_str = metric.name + str(metric.fields) + str(metric.tags)\n    random_value = str(hash(unique_str))[-8:]\n    metric.tags['eventId'] = random_value\n    return metric                                         \n"
-    [[processors.starlark]]
-      source = '''
-    def apply(metric):
-        level = metric.fields.get('level')
-        if level == "I":
-            metric.fields['level'] = "info"
-        elif level == "W":
-            metric.fields['level'] = "warning"
-        elif level == "E":
-            metric.fields['level'] = "error"
-        return metric
-      '''
 
-    [[outputs.loki]]
-      domain = "https://loki.mgmt.superstream.ai"
-      timeout = "15s"
-      endpoint = "/loki/api/v1/push"
-      namepass = [
-        "superstream_logs",
-        "telegraf_logs"
-      ]
-      fieldexclude = [
-        "SDID@0_eventSource",
-        "facility_code",
-        "severity_code",
-        "version",
-        "timestamp",
-        "procid",
-        "pri"
-      ]
-      [outputs.loki.http_headers]
-        Authorization = "$TOKEN"
-    [[outputs.http]]
-      data_format = "prometheusremotewrite"
-      timeout = "15s"
-      method = "POST"
-      namedrop = [
-        "syslog",
-        "telegraf_logs",
-        "internal"
-      ]
-      url = "https://prometheus.mgmt.superstream.ai/api/v1/write"
-      [outputs.http.headers]
-        Authorization = "$TOKEN"    
 
 
     [[inputs.socket_listener]]
@@ -100,7 +48,6 @@ data:
         # Auto Scaler Log (Format A – RFC5424 style)
         "^<%{CUSTOM_INT:pri}>(?P<version>\\d+) %{CUSTOM_TIMESTAMP:timestamp} %{CUSTOM_HOSTNAME:hostname} (?P<appname>[A-Za-z0-9_-]+) (?P<procid>[+-]?\\d+) - - (?P<severity>[A-Za-z0-9_]+) \\[account: (?P<account>[A-Za-z0-9_]+)\\] %{GREEDYDATA:message}"
       ]
-
       name_override = "superstream_logs"
       [inputs.socket_listener.tags]
         accountId = "{{ .Values.global.superstreamAccountId }}"
@@ -125,16 +72,71 @@ data:
             metric.tags['level'] = "info"
         return metric
       ''' 
+        [[processors.dedup]]
+      namepass = ["superstream_logs"]    
+      fieldinclude = ["message"]  
+      dedup_interval = "10s"   
+    [[processors.starlark]]
+      namepass = [
+        "superstream_logs"
+      ]
+      source = "def apply(metric):\n    unique_str = metric.name + str(metric.fields) + str(metric.tags)\n    random_value = str(hash(unique_str))[-8:]\n    metric.tags['eventId'] = random_value\n    return metric                                         \n"
+    [[processors.starlark]]
+      source = '''
+    def apply(metric):
+        level = metric.fields.get('level')
+        if level == "I":
+            metric.fields['level'] = "info"
+        elif level == "W":
+            metric.fields['level'] = "warning"
+        elif level == "E":
+            metric.fields['level'] = "error"
+        return metric
+      '''
+    [[outputs.loki]]
+      domain = "https://loki.mgmt.superstream.ai"
+      timeout = "15s"
+      endpoint = "/loki/api/v1/push"
+      namepass = [
+        "superstream_logs",
+        "telegraf_logs"
+      ]
+      fieldexclude = [
+        "SDID@0_eventSource",
+        "facility_code",
+        "severity_code",
+        "version",
+        "timestamp",
+        "procid",
+        "pri"
+      ]
+      [outputs.loki.http_headers]
+        Authorization = "$TOKEN" 
+
     [[inputs.prometheus]]
-      kubernetes_label_selector = "app.kubernetes.io/name in (nats, superstream)"
+      kubernetes_label_selector = "app.kubernetes.io/name in (superstream-agent)"
       monitor_kubernetes_pods = true
       monitor_kubernetes_pods_method = "settings+annotations"
-      monitor_kubernetes_pods_namespace = "superstream444"
+      monitor_kubernetes_pods_namespace = {{ .Release.Namespace | quote}}
       monitor_kubernetes_pods_port = 7777
       [inputs.prometheus.tags]
         accountId = "{{ .Values.global.superstreamAccountId }}"
         engineName = {{ .Values.global.agentName | quote }}
         agentName = {{ .Values.global.agentName | quote }}
+
+    [[outputs.http]]
+      data_format = "prometheusremotewrite"
+      timeout = "15s"
+      method = "POST"
+      namedrop = [
+        "syslog",
+        "telegraf_logs",
+        "internal"
+      ]
+      url = "https://prometheus.mgmt.superstream.ai/api/v1/write"
+      [outputs.http.headers]
+        Authorization = "$TOKEN"  
+
 
     [[inputs.tail]]
       files = ["/tmp/telegraf.log"]

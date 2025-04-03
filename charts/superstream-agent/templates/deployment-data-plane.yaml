@@ -31,6 +31,13 @@ spec:
       - name: {{ . | quote }}
       {{- end }}
       {{- end }}
+      {{- $pullSecrets := or .Values.global.image.pullSecretNames .Values.superstreamAgent.imagePullSecrets }}
+      {{- if $pullSecrets }}
+      imagePullSecrets:
+      {{- range $pullSecrets }}
+        - name: {{ . | quote }}
+      {{- end }}
+      {{- end }}
       serviceAccountName: {{ include "superstream.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.superstreamAgent.podSecurityContext | nindent 8 }}
