@@ -79,8 +79,6 @@ The following table lists the configurable parameters of the SuperStream chart a
 | `superstreamAgent.nodeSelector` | Node selectors to control the placement of pods. | `{}` |
 | `superstreamAgent.tolerations` | Tolerations for pods to tolerate certain node conditions or taints. | `[]` |
 | `superstreamAgent.affinity` | Affinity rules for pod scheduling. | `{}` |
-| `superstreamAgent.internalNatsConnection.host` | Host for the internal NATS connection. | `""` |
-| `superstreamAgent.internalNatsConnection.port` | Port for the internal NATS connection. | `4222` |
 | `superstreamAgent.controlPlane.host` | Host for the control plane connection. | `"broker.superstream.ai"` |
 | `superstreamAgent.controlPlane.port` | Port for the control plane connection. | `4222` |
 | `superstreamAgent.syslog.enabled` | Determines whether the syslog is enabled for the superstream agent. | `true` |

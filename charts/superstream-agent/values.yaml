@@ -98,9 +98,6 @@ superstreamAgent:
   nodeSelector: {}
   tolerations: []
   affinity: {}
-  internalNatsConnection:
-    host: ""
-    port: 4222
   controlPlane:
     host: "broker.superstream.ai"
     port: 4222
