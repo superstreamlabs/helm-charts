@@ -117,7 +117,7 @@ data:
       kubernetes_label_selector = "app.kubernetes.io/name in (superstream-agent)"
       monitor_kubernetes_pods = true
       monitor_kubernetes_pods_method = "settings+annotations"
-      monitor_kubernetes_pods_namespace = "superstream444"
+      monitor_kubernetes_pods_namespace = {{ .Release.Namespace | quote}}
       monitor_kubernetes_pods_port = 7777
       [inputs.prometheus.tags]
         accountId = "{{ .Values.global.superstreamAccountId }}"
