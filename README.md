@@ -20,10 +20,9 @@ For easiness, create `custom_values.yaml` file and edit the following values:
 # GLOBAL configuration for Superstream Agent
 ############################################################
 global:
-  agentName: ""                   # Define the superstream engine name within 32 characters, excluding '.', and using only lowercase letters, numbers, '-', and '_'.
+  agentName: ""                    # Define the superstream engine name within 32 characters, excluding '.', and using only lowercase letters, numbers, '-', and '_'.
   superstreamAccountId: ""         # Provide the account ID associated with the deployment, which could be used for identifying resources or configurations tied to a specific account.
   superstreamActivationToken: ""   # Enter the activation token required for services or resources that need an initial token for activation or authentication.
-  skipLocalAuthentication: true
 ```
 
 To deploy it, run the following:
@@ -39,7 +38,6 @@ The following table lists the configurable parameters of the SuperStream chart a
 | `global.agentName` | Define the superstream agent name within 32 characters, excluding '.', and using only lowercase letters, numbers, '-', and '_'. | `""` |
 | `global.superstreamAccountId` | Provide the account ID associated with the deployment, which could be used for identifying resources or configurations tied to a specific account. | `""` |
 | `global.superstreamActivationToken` | Enter the activation token required for services or resources that need an initial token for activation or authentication. | `""` |
-| `global.skipLocalAuthentication` | Specifies whether to skip local authentication. | `true` |
 | `global.image.pullPolicy` | Global image pull policy to use for all container images in the chart. Can be overridden by individual image pullPolicy. | `""` |
 | `global.image.pullSecretNames` | Global list of secret names to use as image pull secrets for all pod specs in the chart. Secrets must exist in the same namespace. | `[]` |
 | `global.image.registry` | Global registry to use for all container images in the chart. Can be overridden by individual image registry. | `""` |
@@ -81,8 +79,6 @@ The following table lists the configurable parameters of the SuperStream chart a
 | `superstreamAgent.nodeSelector` | Node selectors to control the placement of pods. | `{}` |
 | `superstreamAgent.tolerations` | Tolerations for pods to tolerate certain node conditions or taints. | `[]` |
 | `superstreamAgent.affinity` | Affinity rules for pod scheduling. | `{}` |
-| `superstreamAgent.internalNatsConnection.host` | Host for the internal NATS connection. | `""` |
-| `superstreamAgent.internalNatsConnection.port` | Port for the internal NATS connection. | `4222` |
 | `superstreamAgent.controlPlane.host` | Host for the control plane connection. | `"broker.superstream.ai"` |
 | `superstreamAgent.controlPlane.port` | Port for the control plane connection. | `4222` |
 | `superstreamAgent.syslog.enabled` | Determines whether the syslog is enabled for the superstream agent. | `true` |
