@@ -42,7 +42,7 @@ data:
     CUSTOM_HOSTNAME [0-9A-Za-z\.-]+
     CUSTOM_WORD [A-Za-z0-9_]+
     '''
-        grok_patterns = [
+      grok_patterns = [
         # Data Plane Log (Format B)
         "^<%{CUSTOM_INT:pri}>%{CUSTOM_TIMESTAMP:timestamp} %{CUSTOM_HOSTNAME:hostname} (?P<appname>[A-Za-z0-9_-]+)\\[%{CUSTOM_INT:procid}\\]: \\[account: (?P<account>[^\\]]+)\\]\\[(?P<severity>[A-Za-z0-9_]+)\\] %{GREEDYDATA:message}",
         # Auto Scaler Log (Format A – RFC5424 style)
