@@ -130,11 +130,11 @@ autoScaler:
   podSecurityContext: {}
   # fsGroup: 2000
 
-  securityContext:
+  securityContext: {}
   # capabilities:
   #   drop:
   #   - ALL
-    readOnlyRootFilesystem: true
+  # readOnlyRootFilesystem: true
   # runAsNonRoot: true
   # runAsUser: 1000
   extraEnv: {}
