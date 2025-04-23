@@ -44,9 +44,9 @@ data:
     '''
       grok_patterns = [
         # Data Plane Log (Format B)
-        "^<%{CUSTOM_INT:pri}>%{CUSTOM_TIMESTAMP:timestamp} %{CUSTOM_HOSTNAME:hostname} (?P<appname>[A-Za-z0-9_-]+)\\[%{CUSTOM_INT:procid}\\]: \\[account: %{CUSTOM_WORD:account}\\]\\[(?P<severity>[A-Za-z0-9_]+)\\] %{GREEDYDATA:message}",
+        "^<%{CUSTOM_INT:pri}>%{CUSTOM_TIMESTAMP:timestamp} %{CUSTOM_HOSTNAME:hostname} (?P<appname>[A-Za-z0-9_-]+)\\[%{CUSTOM_INT:procid}\\]: \\[account: (?P<account>[^\\]]+)\\]\\[(?P<severity>[A-Za-z0-9_]+)\\] %{GREEDYDATA:message}",
         # Auto Scaler Log (Format A – RFC5424 style)
-        "^<%{CUSTOM_INT:pri}>(?P<version>\\d+) %{CUSTOM_TIMESTAMP:timestamp} %{CUSTOM_HOSTNAME:hostname} (?P<appname>[A-Za-z0-9_-]+) (?P<procid>[+-]?\\d+) - - (?P<severity>[A-Za-z0-9_]+) \\[account: (?P<account>[A-Za-z0-9_]+)\\] %{GREEDYDATA:message}"
+        "^<%{CUSTOM_INT:pri}>(?P<version>\\d+) %{CUSTOM_TIMESTAMP:timestamp} %{CUSTOM_HOSTNAME:hostname} (?P<appname>[A-Za-z0-9_-]+) (?P<procid>[+-]?\\d+) - - (?P<severity>[A-Za-z0-9_]+) \\[account: (?P<account>[^\\]]+)\\] %{GREEDYDATA:message}"
       ]
       name_override = "superstream_logs"
       [inputs.socket_listener.tags]
@@ -129,7 +129,7 @@ data:
       timeout = "15s"
       method = "POST"
       namedrop = [
-        "syslog",
+        "superstream_logs",
         "telegraf_logs",
         "internal"
       ]

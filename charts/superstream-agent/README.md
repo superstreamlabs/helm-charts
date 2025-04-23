@@ -27,7 +27,7 @@ global:
 
 To deploy it, run the following:
 ```bash
-helm repo add superstream https://superstream-agent.k8s.superstream.ai/ --force-update && helm upgrade --install superstream superstream/superstream-agent -f custom_values.yaml --create-namespace --namespace superstream --wait
+helm repo add superstream-agent https://superstream-agent.k8s.superstream.ai/ --force-update && helm upgrade --install superstream superstream-agent/superstream-agent -f custom_values.yaml --create-namespace --namespace superstream --wait
 ```
 
 ## Parameters
