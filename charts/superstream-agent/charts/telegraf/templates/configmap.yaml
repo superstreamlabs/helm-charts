@@ -134,6 +134,9 @@ data:
         "internal"
       ]
       url = "https://prometheus.mgmt.superstream.ai/api/v1/write"
+      {{- if .Values.global.proxy.url }}
+      http_proxy_url = "{{ .Values.global.proxy.url }}"
+      {{- end }}  
       [outputs.http.headers]
         Authorization = "$TOKEN"  
 
