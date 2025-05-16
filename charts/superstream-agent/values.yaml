@@ -9,8 +9,8 @@ global:
   image:
     # Global image pull policy to use for all container images in the chart
     # can be overridden by individual image pullPolicy
-    pullPolicy: # Global list of secret names to use as image pull secrets for all pod specs in the chart
-
+    pullPolicy: 
+    # Global list of secret names to use as image pull secrets for all pod specs in the chart
     # secrets must exist in the same namespace
     # https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
     pullSecretNames: []
