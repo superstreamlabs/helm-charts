@@ -172,12 +172,15 @@
                 "ec2:DescribeSecurityGroups",
                 "ec2:DescribeVpcs",
                 "iam:SimulatePrincipalPolicy",
-                "iam:GetUser",
                 "ce:GetCostAndUsageWithResources",
                 "ce:ListTagsForResource",
                 "ce:UpdateCostAllocationTagsStatus",
                 "ce:ListCostAllocationTags",
-                "ce:GetTags"
+                "ce:GetTags",
+                "iam:GetUser",
+                "iam:GetPolicy",
+                "iam:GetPolicyVersion",
+                "health:DescribeEvents"
             ],
             "Resource": "*"
         }
