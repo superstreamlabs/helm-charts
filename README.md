@@ -42,6 +42,8 @@ The following table lists the configurable parameters of the SuperStream chart a
 | `global.image.pullSecretNames` | Global list of secret names to use as image pull secrets for all pod specs in the chart. Secrets must exist in the same namespace. | `[]` |
 | `global.image.registry` | Global registry to use for all container images in the chart. Can be overridden by individual image registry. | `""` |
 | `global.labels` | Global labels to use for all container images in the chart. | `{}` |
+| `global.proxy.url` | HTTP/HTTPS proxy URL to use for outbound connections. | `""` |
+| `global.proxy.noProxy` | Comma-separated list of hosts that should bypass the proxy. Default includes: localhost,127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local | `""` |
 | `superstreamAgent.releaseDate` | Release date for the backend component. | `""` |
 | `superstreamAgent.replicaCount` | Number of replicas for the backend deployment. | `2` |
 | `superstreamAgent.image.repository` | Docker image repository for the backend service. | `superstreamlabs/superstream-data-plane-be` |
