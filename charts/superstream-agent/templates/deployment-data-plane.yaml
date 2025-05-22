@@ -53,8 +53,6 @@ spec:
           env:
             - name: ENV_NAME
               value: {{ .Values.global.agentName }}
-            - name: LOCAL_NATS_SKIP
-              value: 'true'
             - name: ACTIVATION_TOKEN
               valueFrom:
                 secretKeyRef:
