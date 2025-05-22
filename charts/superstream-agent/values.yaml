@@ -24,7 +24,7 @@ global:
   # Proxy configuration for the agent
   # url: HTTP/HTTPS proxy URL to use for outbound connections
   # noProxy: Comma-separated list of hosts that should bypass the proxy
-  # Default no-proxy settings typically include: localhost,127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local
+  # Default no-proxy settings typically include: 169.254.169.254,localhost,127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,.svc,.cluster.local
   proxy:
     url: ""
     noProxy: ""
