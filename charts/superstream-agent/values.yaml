@@ -97,7 +97,7 @@ superstreamAgent:
       memory: 1Gi
   # Autoscaling configuration for dynamically adjusting the number of pod replicas
   autoscaling:
-    enabled: true
+    enabled: false
     minReplicas: 2
     maxReplicas: 5
     targetCPUUtilizationPercentage: 75
@@ -162,7 +162,7 @@ autoScaler:
       memory: 500Mi
   # Enables autoscaling to manage the replicas of the autoscaler    
   autoscaling:
-    enabled: true
+    enabled: false
     minReplicas: 2
     maxReplicas: 5
     targetCPUUtilizationPercentage: 75
