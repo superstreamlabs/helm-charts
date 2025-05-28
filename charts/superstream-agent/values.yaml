@@ -107,7 +107,7 @@ superstreamAgent:
   affinity: {}
   controlPlane:
     host: "broker.superstream.ai"
-    port: 4222
+    protocol: nats
   syslog:
     enabled: true
     remoteSyslog: telegraf
