@@ -73,7 +73,7 @@ The following table lists the configurable parameters of the SuperStream chart a
 | `superstreamAgent.resources.limits.memory` | Memory limit for the backend pod. | `8Gi` |
 | `superstreamAgent.resources.requests.cpu` | CPU request for the backend pod. | `1` |
 | `superstreamAgent.resources.requests.memory` | Memory request for the backend pod. | `1Gi` |
-| `superstreamAgent.autoscaling.enabled` | Enable autoscaling for the backend. | `true` |
+| `superstreamAgent.autoscaling.enabled` | Enable autoscaling for the backend. | `false` |
 | `superstreamAgent.autoscaling.minReplicas` | Minimum number of replicas for autoscaling. | `2` |
 | `superstreamAgent.autoscaling.maxReplicas` | Maximum number of replicas for autoscaling. | `5` |
 | `superstreamAgent.autoscaling.targetCPUUtilizationPercentage` | CPU utilization percentage for autoscaling. | `75` |
@@ -81,8 +81,8 @@ The following table lists the configurable parameters of the SuperStream chart a
 | `superstreamAgent.nodeSelector` | Node selectors to control the placement of pods. | `{}` |
 | `superstreamAgent.tolerations` | Tolerations for pods to tolerate certain node conditions or taints. | `[]` |
 | `superstreamAgent.affinity` | Affinity rules for pod scheduling. | `{}` |
-| `superstreamAgent.controlPlane.host` | Host for the control plane connection. | `"broker.superstream.ai"` |
-| `superstreamAgent.controlPlane.port` | Port for the control plane connection. | `4222` |
+| `superstreamAgent.controlPlane.host` | Host for the control plane connection | `"broker.superstream.ai"` |
+| `superstreamAgent.controlPlane.protocol` | Control plane protocol. When set to "nats", port 4222 is used. When proxy is configured or protocol is not "nats", port 8443 is used | `"nats"` |
 | `superstreamAgent.syslog.enabled` | Determines whether the syslog is enabled for the superstream agent. | `true` |
 | `superstreamAgent.syslog.remoteSyslog` | Remote syslog server to send logs to. | `telegraf` |
 | `superstreamAgent.syslog.port` | Port for the remote syslog. | `6514` |
@@ -107,7 +107,7 @@ The following table lists the configurable parameters of the SuperStream chart a
 | `autoScaler.resources.limits.memory` | Memory limit for the autoscaler pod. | `2Gi` |
 | `autoScaler.resources.requests.cpu` | CPU request for the autoscaler pod. | `500m` |
 | `autoScaler.resources.requests.memory` | Memory request for the autoscaler pod. | `500Mi` |
-| `autoScaler.autoscaling.enabled` | Enable autoscaling to manage the replicas of the autoscaler. | `true` |
+| `autoScaler.autoscaling.enabled` | Enable autoscaling to manage the replicas of the autoscaler. | `false` |
 | `autoScaler.autoscaling.minReplicas` | Minimum number of replicas for autoscaling. | `2` |
 | `autoScaler.autoscaling.maxReplicas` | Maximum number of replicas for autoscaling. | `5` |
 | `autoScaler.autoscaling.targetCPUUtilizationPercentage` | CPU utilization percentage for autoscaling. | `75` |
