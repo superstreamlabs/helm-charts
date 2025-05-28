@@ -1,4 +1,3 @@
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -65,7 +64,9 @@ spec:
             - name: CONTROL_PLANE_HOST
               value: {{ .Values.superstreamAgent.controlPlane.host }}
             - name: CONTROL_PLANE_PORT
-              value: {{ .Values.superstreamAgent.controlPlane.port | quote }}
+              value: "{{- if .Values.global.proxy.url -}}8443{{- else if eq .Values.superstreamAgent.controlPlane.protocol "nats" -}}4222{{- else -}}8443{{- end -}}"
+            - name: CONTROL_PLANE_PROTOCOL
+              value: "{{- if .Values.global.proxy.url -}}wss{{- else -}}{{ .Values.superstreamAgent.controlPlane.protocol}}{{- end }}"
             - name: SYSLOG
               value: {{ .Values.superstreamAgent.syslog.enabled | quote }}
             - name: SYSLOG_HOST
