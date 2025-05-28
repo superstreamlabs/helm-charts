@@ -64,7 +64,7 @@ spec:
             - name: CONTROL_PLANE_HOST
               value: {{ .Values.superstreamAgent.controlPlane.host }}
             - name: CONTROL_PLANE_PORT
-              value: {{- if eq .Values.superstreamAgent.controlPlane.protocol "nats" -}}4222{{- else -}}8443{{- end -}}
+              value: {{- if eq .Values.superstreamAgent.controlPlane.protocol "nats" -}}4222{{- else if .Values.global.proxy.url -}}8443{{- else -}}8443{{- end -}}
             - name: CONTROL_PLANE_PROTOCOL
               value: {{ .Values.superstreamAgent.controlPlane.protocol | quote }}
             - name: SYSLOG
