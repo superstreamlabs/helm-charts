@@ -107,7 +107,8 @@ superstreamAgent:
   affinity: {}
   controlPlane:
     host: "broker.superstream.ai"
-    port: 4222
+    # Default protocol is NATS for port 4222, WSS protocol for port 8443.
+    protocol: nats
   syslog:
     enabled: true
     remoteSyslog: telegraf
