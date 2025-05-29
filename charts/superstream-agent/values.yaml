@@ -93,7 +93,7 @@ superstreamAgent:
       cpu: '4'
       memory: 4Gi
     requests:
-      cpu: '10m'
+      cpu: '100m'
       memory: 128Mi
   # Autoscaling configuration for dynamically adjusting the number of pod replicas
   autoscaling:
@@ -159,7 +159,7 @@ autoScaler:
       cpu: '2'
       memory: 2Gi
     requests:
-      cpu: '10m'
+      cpu: '100m'
       memory: 128Mi
   # Enables autoscaling to manage the replicas of the autoscaler    
   autoscaling:
