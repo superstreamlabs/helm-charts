@@ -4,6 +4,38 @@ entries:
   - annotations:
       artifacthub.io/changes: |-
         - kind: changed
+          description: Bump Superstream-Data-Plane to 1.1.704
+      autoScalerVersion: 1.1.700
+      category: Streaming and Messaging
+      dataPlaneVersion: 1.1.704
+      licenses: Superstream Labs Business Source License 1.0
+    apiVersion: v2
+    appVersion: 1.1.704
+    created: "2025-06-08T16:24:32.560128743Z"
+    dependencies:
+    - name: telegraf
+      repository: ""
+      version: 1.8.55
+    description: Superstream Official Helm chart
+    digest: 934963ee55f09eabd83e43927868bb366fd6534a72a691a01863cfd953f467ec
+    home: https://superstream.ai
+    icon: https://memphis-public-files.s3.eu-central-1.amazonaws.com/superstream_logo.png
+    keywords:
+    - data streaming
+    - cost reduction
+    - superstream
+    - kafka
+    maintainers:
+    - name: Superstream Labs
+      url: https://superstream.ai
+    name: superstream-agent
+    type: application
+    urls:
+    - https://github.com/superstreamlabs/helm-charts/releases/download/superstream-agent-0.1.19/superstream-agent-0.1.19.tgz
+    version: 0.1.19
+  - annotations:
+      artifacthub.io/changes: |-
+        - kind: changed
           description: Bump Superstream-Data-Plane to 1.1.703
       autoScalerVersion: 1.1.700
       category: Streaming and Messaging
@@ -1569,4 +1601,4 @@ entries:
     urls:
     - https://github.com/superstreamlabs/helm-charts/releases/download/superstream-agent-0.0.1/superstream-agent-0.0.1.tgz
     version: 0.0.1
-generated: "2025-06-05T07:50:07.008965031Z"
+generated: "2025-06-08T16:24:32.560382767Z"
