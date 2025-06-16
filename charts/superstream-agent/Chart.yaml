@@ -39,4 +39,4 @@ appVersion: "1.1.705"
 icon: https://memphis-public-files.s3.eu-central-1.amazonaws.com/superstream_logo.png
 dependencies:
   - name: telegraf
-    version: 1.8.55
+    version: 1.8.57
