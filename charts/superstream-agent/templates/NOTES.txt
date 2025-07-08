@@ -10,11 +10,11 @@ Thank you for installing {{ .Chart.Name }}!
 
 
 Website: https://superstream.ai
-Documentations: https://docs.superstream.ai
+Documentation: https://docs.superstream.ai
 ---------------------------------------------------------------------------------------------------------------------------------------------
 Connect Your Kafka Cluster
 
-Login to SSM Console and Add a new connection: https://app.superstream.ai/
+Login to the SSM Console and add a new connection: https://app.superstream.ai/
 If this is your first login, please use the link included in your welcome email.
 ---------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -23,5 +23,5 @@ Deployment Information
 
 ## Pods Deployed ##
 2 - Superstream DataPlane's
-2 - Superstream AutoScaller's
+1 - Superstream AutoScaller
 1 - Telegraf
