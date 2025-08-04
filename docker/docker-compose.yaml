@@ -38,7 +38,7 @@ services:
     image: containrrr/watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    command: --interval 60
+    command: --interval 300
   telegraf:
     image: library/telegraf:1.32-alpine
     restart: always
