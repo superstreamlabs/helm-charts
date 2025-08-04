@@ -1,23 +1,185 @@
-version: '3.3'
-services:
-  superstream:
+version: '3.8'
+services:  
+  data-plane:
     image: superstreamlabs/superstream-data-plane-be:latest
-    depends_on:
-      - nats
-    restart: on-failure
     pull_policy: always
-    ports:
-      - "7777:7777"
+    restart: always
+    depends_on:
+      - telegraf
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"      
     environment:
-      ACTIVATION_TOKEN: ""
-      SKIP_LOCAL_AUTHENTICATION: 'true'
-      PORT: '7777'
-      ENCRYPTION_SECRET_KEY: "long32charactersencryptionsecret"
-      LOCAL_NATS_SKIP : 'true'
-      CONTROL_PLANE_HOST: broker.superstream.ai
-      CONTROL_PLANE_PORT: '4222'
+      - ENV_NAME=docker
+      - ACTIVATION_TOKEN
+      - CONTROL_PLANE_HOST=broker.superstream.ai
+      - CONTROL_PLANE_PORT=4222
+      - CONTROL_PLANE_PROTOCOL=nats
+      - SYSLOG_HOST=telegraf
+      - SYSLOG_PORT=6514
+      - SYSLOG_PROTOCOL=udp
+      - CH_SKIP=false
 
-networks:
-  superstream:
-    ipam:
-      driver: default
+  auto-scaler:
+    image: superstreamlabs/superstream-kafka-auto-scaler:latest
+    pull_policy: always
+    restart: always
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"    
+    environment:
+      - ENV_NAME=docker
+      - ACTIVATION_TOKEN
+      - CONTROL_PLANE_HOST=broker.superstream.ai
+      - CONTROL_PLANE_PORT=4222
+      - CONTROL_PLANE_PROTOCOL=nats
+      - SYSLOG_HOST=telegraf
+      - SYSLOG_PORT=6514
+      - SYSLOG_PROTOCOL=utp 
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 30
+  telegraf:
+    image: library/telegraf:1.32-alpine
+    restart: always
+    ports:
+      - "6514:6514/udp"  # For socket_listener input
+    environment: 
+      - ACTIVATION_TOKEN
+      - AccountId
+      - TELEGRAF_CONFIG_PATH=/etc/telegraf/telegraf.conf
+    configs:
+      - source: telegraf_config
+        target: /etc/telegraf/telegraf.conf
+        mode: 0444
+
+configs:
+  telegraf_config:
+    content: |
+      [agent]
+        collection_jitter = "0s"
+        debug = false
+        flush_interval = "10s"
+        flush_jitter = "0s"
+        hostname = "telegraf-polling-service"
+        interval = "10s"
+        logfile = "/tmp/telegraf.log"
+        logfile_rotation_max_archives = 5
+        logfile_rotation_max_size = "10MB"
+        metric_batch_size = 1000
+        metric_buffer_limit = 10000
+        omit_hostname = false
+        precision = ""
+        quiet = false
+        round_interval = true
+      
+      [[processors.enum]]
+        [[processors.enum.mapping]]
+          dest = "status_code"
+          field = "status"
+          [processors.enum.mapping.value_mappings]
+              critical = 3
+              healthy = 1
+              problem = 2
+
+      [[inputs.socket_listener]]
+        service_address = "udp://:6514"
+        data_format = "grok"
+        grok_custom_patterns = '''
+      CUSTOM_TIMESTAMP \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})
+      CUSTOM_INT [+-]?\d+
+      CUSTOM_HOSTNAME [0-9A-Za-z\.-]+
+      CUSTOM_WORD [A-Za-z0-9_]+
+      '''
+        grok_patterns = [
+          "^<%{CUSTOM_INT:pri}>%{CUSTOM_TIMESTAMP:timestamp} %{CUSTOM_HOSTNAME:hostname} (?P<appname>[A-Za-z0-9_-]+)\\[%{CUSTOM_INT:procid}\\]: \\[account: (?P<account>[^\\]]+)\\]\\[(?P<severity>[A-Za-z0-9_]+)\\] %{GREEDYDATA:message}",
+          "^<%{CUSTOM_INT:pri}>(?P<version>\\d+) %{CUSTOM_TIMESTAMP:timestamp} %{CUSTOM_HOSTNAME:hostname} (?P<appname>[A-Za-z0-9_-]+) (?P<procid>[+-]?\\d+) - - (?P<severity>[A-Za-z0-9_]+) \\[account: (?P<account>[^\\]]+)\\] %{GREEDYDATA:message}"
+        ]
+        name_override = "superstream_logs"
+        [inputs.socket_listener.tags]
+          accountId = "$AccountId"
+          engineName = "docker"
+          agentName = "docker"
+
+      [[processors.converter]]
+        namepass = ["superstream_logs"]
+        [processors.converter.fields]
+          tag = ["appname", "severity", "account","hostname"]
+
+      [[processors.starlark]]
+        namepass = ["superstream_logs"]
+        source = '''
+      def apply(metric):
+          severity = metric.tags.get('severity')
+          if severity == "ERR":
+              metric.tags['level'] = "error"
+          elif severity == "WRN":
+              metric.tags['level'] = "warning"
+          elif severity == "INF":
+              metric.tags['level'] = "info"
+          return metric
+        '''
+
+      [[processors.dedup]]
+        namepass = ["superstream_logs"]
+        fieldinclude = ["message"]
+        dedup_interval = "10s"
+
+      [[processors.starlark]]
+        namepass = ["superstream_logs"]
+        source = "def apply(metric):\n    unique_str = metric.name + str(metric.fields) + str(metric.tags)\n    random_value = str(hash(unique_str))[-8:]\n    metric.tags['eventId'] = random_value\n    return metric\n"
+
+      [[processors.starlark]]
+        source = '''
+      def apply(metric):
+          level = metric.fields.get('level')
+          if level == "I":
+              metric.fields['level'] = "info"
+          elif level == "W":
+              metric.fields['level'] = "warning"
+          elif level == "E":
+              metric.fields['level'] = "error"
+          return metric
+        '''
+
+      [[outputs.loki]]
+        domain = "https://loki.mgmt.superstream.ai"
+        timeout = "15s"
+        endpoint = "/loki/api/v1/push"
+        namepass = ["superstream_logs", "telegraf_logs"]
+        fieldexclude = [
+          "SDID@0_eventSource",
+          "facility_code",
+          "severity_code",
+          "version",
+          "timestamp",
+          "procid",
+          "pri"
+        ]
+        [outputs.loki.http_headers]
+          Authorization = "$ACTIVATION_TOKEN"
+
+      [[inputs.tail]]
+        files = ["/tmp/telegraf.log"]
+        from_beginning = false
+        name_override = "telegraf_logs"
+        data_format = "grok"
+        grok_custom_patterns = '''
+      LOGLEVEL [IWE]
+      COMPONENT \[(.*?)\]
+        '''
+        grok_patterns = [
+          "%{TIMESTAMP_ISO8601:timestamp} %{LOGLEVEL:level}! %{COMPONENT:component} %{GREEDYDATA:message}",
+        ]
+        [inputs.tail.tags]
+          accountId = "$AccountId"
+          engineName = "docker"
+          agentName = "docker"
+          appname = "telegraf"
+
+      [[inputs.internal]]
+        collect_memstats = true
+        [inputs.internal.tags]
+          accountId = "$AccountId"
+          engineName = "docker"
+          agentName = "docker"
