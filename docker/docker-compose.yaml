@@ -9,7 +9,7 @@ services:
     labels:
       - "com.centurylinklabs.watchtower.enable=true"      
     environment:
-      - ENV_NAME=docker
+      - ENV_NAME
       - ACTIVATION_TOKEN
       - CONTROL_PLANE_HOST=broker.superstream.ai
       - CONTROL_PLANE_PORT=4222
@@ -26,7 +26,7 @@ services:
     labels:
       - "com.centurylinklabs.watchtower.enable=true"    
     environment:
-      - ENV_NAME=docker
+      - ENV_NAME
       - ACTIVATION_TOKEN
       - CONTROL_PLANE_HOST=broker.superstream.ai
       - CONTROL_PLANE_PORT=4222
@@ -47,7 +47,7 @@ services:
     environment: 
       - ACTIVATION_TOKEN
       - AccountId
-      - AgentName
+      - ENV_NAME
       - TELEGRAF_CONFIG_PATH=/etc/telegraf/telegraf.conf
     configs:
       - source: telegraf_config
@@ -99,8 +99,8 @@ configs:
         name_override = "superstream_logs"
         [inputs.socket_listener.tags]
           accountId = "$AccountId"
-          engineName = "$AgentName"
-          agentName = "$AgentName"
+          engineName = "$ENV_NAME"
+          agentName = "$ENV_NAME"
 
       [[processors.converter]]
         namepass = ["superstream_logs"]
@@ -174,13 +174,13 @@ configs:
         ]
         [inputs.tail.tags]
           accountId = "$AccountId"
-          engineName = "$AgentName"
-          agentName = "$AgentName"
+          engineName = "$ENV_NAME"
+          agentName = "$ENV_NAME"
           appname = "telegraf"
 
       [[inputs.internal]]
         collect_memstats = true
         [inputs.internal.tags]
           accountId = "$AccountId"
-          engineName = "$AgentName"
-          agentName = "$AgentName"
+          engineName = "$ENV_NAME"
+          agentName = "$ENV_NAME"
