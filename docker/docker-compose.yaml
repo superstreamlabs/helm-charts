@@ -47,6 +47,7 @@ services:
     environment: 
       - ACTIVATION_TOKEN
       - AccountId
+      - AgentName
       - TELEGRAF_CONFIG_PATH=/etc/telegraf/telegraf.conf
     configs:
       - source: telegraf_config
@@ -98,8 +99,8 @@ configs:
         name_override = "superstream_logs"
         [inputs.socket_listener.tags]
           accountId = "$AccountId"
-          engineName = "docker"
-          agentName = "docker"
+          engineName = "$AgentName"
+          agentName = "$AgentName"
 
       [[processors.converter]]
         namepass = ["superstream_logs"]
@@ -173,13 +174,13 @@ configs:
         ]
         [inputs.tail.tags]
           accountId = "$AccountId"
-          engineName = "docker"
-          agentName = "docker"
+          engineName = "$AgentName"
+          agentName = "$AgentName"
           appname = "telegraf"
 
       [[inputs.internal]]
         collect_memstats = true
         [inputs.internal.tags]
           accountId = "$AccountId"
-          engineName = "docker"
-          agentName = "docker"
+          engineName = "$AgentName"
+          agentName = "$AgentName"
