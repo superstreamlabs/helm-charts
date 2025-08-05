@@ -9,7 +9,7 @@ services:
     labels:
       - "com.centurylinklabs.watchtower.enable=true"      
     environment:
-      - ENV_NAME
+      - ENV_NAME=${AGENT_NAME}
       - ACTIVATION_TOKEN
       - CONTROL_PLANE_HOST=broker.superstream.ai
       - CONTROL_PLANE_PORT=4222
@@ -26,7 +26,7 @@ services:
     labels:
       - "com.centurylinklabs.watchtower.enable=true"    
     environment:
-      - ENV_NAME
+      - ENV_NAME=${AGENT_NAME}
       - ACTIVATION_TOKEN
       - CONTROL_PLANE_HOST=broker.superstream.ai
       - CONTROL_PLANE_PORT=4222
@@ -46,8 +46,8 @@ services:
       - "6514:6514/udp"  # For socket_listener input
     environment: 
       - ACTIVATION_TOKEN
-      - AccountId
-      - ENV_NAME
+      - ACCOUNTID
+      - AGENT_NAME
       - TELEGRAF_CONFIG_PATH=/etc/telegraf/telegraf.conf
     configs:
       - source: telegraf_config
@@ -98,9 +98,9 @@ configs:
         ]
         name_override = "superstream_logs"
         [inputs.socket_listener.tags]
-          accountId = "$AccountId"
-          engineName = "$ENV_NAME"
-          agentName = "$ENV_NAME"
+          accountId = "$ACCOUNTID"
+          engineName = "$AGENT_NAME"
+          agentName = "$AGENT_NAME"
 
       [[processors.converter]]
         namepass = ["superstream_logs"]
@@ -173,14 +173,14 @@ configs:
           "%{TIMESTAMP_ISO8601:timestamp} %{LOGLEVEL:level}! %{COMPONENT:component} %{GREEDYDATA:message}",
         ]
         [inputs.tail.tags]
-          accountId = "$AccountId"
-          engineName = "$ENV_NAME"
-          agentName = "$ENV_NAME"
+          accountId = "$ACCOUNTID"
+          engineName = "$AGENT_NAME"
+          agentName = "$AGENT_NAME"
           appname = "telegraf"
 
       [[inputs.internal]]
         collect_memstats = true
         [inputs.internal.tags]
-          accountId = "$AccountId"
-          engineName = "$ENV_NAME"
-          agentName = "$ENV_NAME"
+          accountId = "$ACCOUNTID"
+          engineName = "$AGENT_NAME"
+          agentName = "$AGENT_NAME"
