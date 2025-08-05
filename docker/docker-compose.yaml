@@ -46,7 +46,7 @@ services:
       - "6514:6514/udp"  # For socket_listener input
     environment: 
       - ACTIVATION_TOKEN
-      - ACCOUNTID
+      - ACCOUNT_ID
       - AGENT_NAME
       - TELEGRAF_CONFIG_PATH=/etc/telegraf/telegraf.conf
     configs:
@@ -98,7 +98,7 @@ configs:
         ]
         name_override = "superstream_logs"
         [inputs.socket_listener.tags]
-          accountId = "$ACCOUNTID"
+          accountId = "$ACCOUNT_ID"
           engineName = "$AGENT_NAME"
           agentName = "$AGENT_NAME"
 
@@ -173,7 +173,7 @@ configs:
           "%{TIMESTAMP_ISO8601:timestamp} %{LOGLEVEL:level}! %{COMPONENT:component} %{GREEDYDATA:message}",
         ]
         [inputs.tail.tags]
-          accountId = "$ACCOUNTID"
+          accountId = "$ACCOUNT_ID"
           engineName = "$AGENT_NAME"
           agentName = "$AGENT_NAME"
           appname = "telegraf"
@@ -181,6 +181,6 @@ configs:
       [[inputs.internal]]
         collect_memstats = true
         [inputs.internal.tags]
-          accountId = "$ACCOUNTID"
+          accountId = "$ACCOUNT_ID"
           engineName = "$AGENT_NAME"
           agentName = "$AGENT_NAME"
