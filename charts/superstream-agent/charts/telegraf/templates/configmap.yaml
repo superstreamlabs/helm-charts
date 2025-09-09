@@ -25,7 +25,7 @@ data:
     [[processors.enum]]
       [[processors.enum.mapping]]
         dest = "status_code"
-        field = "status"
+        fields = ["status"]
         [processors.enum.mapping.value_mappings]
             critical = 3
             healthy = 1
