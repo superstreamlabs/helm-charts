@@ -19,7 +19,7 @@ global:
 
 replicaCount: 1
 image:
-  repo: "docker.io/library/telegraf"
+  repo: "library/telegraf"
   tag: "1.35-alpine"
   pullPolicy: IfNotPresent
   registry: 
