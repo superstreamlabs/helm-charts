@@ -19,8 +19,8 @@ global:
 
 replicaCount: 1
 image:
-  repo: "library/telegraf"
-  tag: "1.34-alpine"
+  repo: "docker.io/library/telegraf"
+  tag: "1.35-alpine"
   pullPolicy: IfNotPresent
   registry: 
 podAnnotations: {}
@@ -109,7 +109,7 @@ rbac:
     - services
     - endpoints
     - pods
-    verbs: ["get", "list", "watch"]              
+    verbs: ["get", "list", "watch"]
 # When using the prometheus input to scrape all pods you need extra rules set to the ClusterRole to be
 # able to scan the pods for scraping labels. The following rules have been taken from:
 # https://github.com/helm/charts/blob/master/stable/prometheus/templates/server-clusterrole.yaml#L8-L46
@@ -178,3 +178,8 @@ pdb:
   create: true
   minAvailable: 1
   # maxUnavailable: 1
+
+# containerPorts:
+# - name: http
+#   containerPort: 9273
+#   protocol: TCP
