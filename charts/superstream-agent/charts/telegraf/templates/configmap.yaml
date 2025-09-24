@@ -93,6 +93,50 @@ data:
             metric.fields['level'] = "error"
         return metric
       '''
+    [[processors.starlark]]
+      namepass = ["superstream_logs"]
+      source = '''
+    MAX_RECENT = 200
+    _seen = {}
+
+    def norm(s):
+        # Replace digit runs with a single '#'
+        out, d = "", False
+        for ch in s:
+            isd = ch >= "0" and ch <= "9"
+            if isd:
+                if not d: out += "#"
+                d = True
+            else:
+                out += ch
+                d = False
+        return out
+
+    def stream_key(m):
+        return "{}|{}|{}|{}".format(
+            m.tags.get("namespace",""),
+            m.tags.get("pod",""),
+            m.tags.get("container",""),
+            m.tags.get("appname",""),
+        )
+
+    def apply(metric):
+        msg = metric.fields.get("message","")
+        if msg == "": return metric
+        k = stream_key(metric)
+        ent = _seen.get(k) or {"order": [], "map": {}}
+        _seen[k] = ent
+
+        key = norm(msg)
+        if ent["map"].get(key, False):
+            return None
+        ent["map"][key] = True
+        ent["order"].append(key)
+        if len(ent["order"]) > MAX_RECENT:
+            oldest = ent["order"].pop(0)
+            del ent["map"][oldest]
+        return metric
+    '''      
     [[outputs.loki]]
       domain = "https://loki.mgmt.superstream.ai"
       timeout = "15s"
