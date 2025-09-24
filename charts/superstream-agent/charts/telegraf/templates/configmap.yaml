@@ -94,7 +94,9 @@ data:
         return metric
       '''
     [[processors.starlark]]
-      namepass = ["superstream_logs"]
+      namepass = [
+        "superstream_logs"
+      ] 
       source = '''
     MAX_RECENT = 200
     _seen = {}
