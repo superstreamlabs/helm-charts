@@ -93,6 +93,14 @@ data:
             metric.fields['level'] = "error"
         return metric
       '''
+    [[processors.starlark]]
+      order = 1
+      source = '''
+    def apply(metric):
+        # Log or count events here
+        print("Processing event: " + str(metric.fields.get("message", "")[:50]))
+        return metric
+    '''      
     [[processors.dedup]]
       dedup_interval = "5m"
 
