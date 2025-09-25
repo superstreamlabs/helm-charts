@@ -95,8 +95,7 @@ data:
       '''
     [[processors.dedup]]
       dedup_interval = "5m"
-      # Group by message content only - will dedupe identical messages
-      dedup_key = ["message"]      
+
     [[outputs.loki]]
       domain = "https://loki.mgmt.superstream.ai"
       timeout = "15s"
