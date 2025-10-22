@@ -29,9 +29,8 @@ imagePullSecrets: []
 fullnameOverride: datadog
 
 # Datadog API configuration
-datadog:
-  apiKey: "" # Will be set from secret
-  site: "us5.datadoghq.com"
+apiKey: "" # Will be set from parent chart
+site: "us5.datadoghq.com"
   
 # Service configuration
 service:
