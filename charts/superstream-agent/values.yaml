@@ -179,4 +179,13 @@ datadog:
   enabled: false
   apiKey: "" # Will be set from secret
   site: "us5.datadoghq.com"
+  # Superstream configuration for Datadog
+  controlPlane:
+    host: "broker.superstream.ai"
+    port: "4222"
+    protocol: "nats"
+  syslog:
+    host: "telegraf"
+    protocol: "udp"
+    port: "6514"
 
