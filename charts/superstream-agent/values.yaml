@@ -188,4 +188,10 @@ datadog:
     host: "telegraf"
     protocol: "udp"
     port: "6514"
+  
+  # RBAC configuration
+  rbac:
+    create: true
+    clusterWide: true
+    createRole: true  # Also create Role/RoleBinding in addition to ClusterRole/ClusterRoleBinding
 

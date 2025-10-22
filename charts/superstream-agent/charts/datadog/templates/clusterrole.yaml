@@ -7,9 +7,6 @@ metadata:
     {{- include "datadog.labels" . | nindent 4 }}
 rules:
   - apiGroups: [""]
-    resources: ["pods"]
-    verbs: ["get", "list", "delete"]
-  - apiGroups: [""]
     resources:
       - services
       - events
