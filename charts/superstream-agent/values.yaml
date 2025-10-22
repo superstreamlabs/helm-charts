@@ -171,3 +171,12 @@ autoScaler:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+
+############################################################
+# Datadog Agent config
+############################################################
+datadog:
+  enabled: false
+  apiKey: "" # Will be set from secret
+  site: "us5.datadoghq.com"
+
