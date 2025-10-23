@@ -29,9 +29,18 @@ imagePullSecrets: []
 fullnameOverride: datadog
 
 # Datadog API configuration
-apiKey: "" # Will be set from parent chart
 site: "us5.datadoghq.com"
-  
+
+# Superstream configuration for Datadog
+controlPlane:
+  host: "broker.superstream.ai"
+  port: "4222"
+  protocol: "nats"
+syslog:
+  host: "telegraf"
+  protocol: "udp"
+  port: "6514"
+
 # Service configuration
 service:
   enabled: true
@@ -51,6 +60,7 @@ service:
 rbac:
   create: true
   clusterWide: true
+  createRole: true  # Also create Role/RoleBinding in addition to ClusterRole/ClusterRoleBinding
 
 serviceAccount:
   create: true

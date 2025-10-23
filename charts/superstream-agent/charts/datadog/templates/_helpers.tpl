@@ -63,13 +63,6 @@ Create the name of the service account to use
 {{- end }}
 
 {{/*
-Create the name of the secret to use
-*/}}
-{{- define "datadog.secretName" -}}
-{{- include "datadog.fullname" . }}
-{{- end }}
-
-{{/*
 Create the name of the service to use
 */}}
 {{- define "datadog.serviceName" -}}

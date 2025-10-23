@@ -177,21 +177,5 @@ autoScaler:
 ############################################################
 datadog:
   enabled: false
-  apiKey: "" # Will be set from secret
-  site: "us5.datadoghq.com"
-  # Superstream configuration for Datadog
-  controlPlane:
-    host: "broker.superstream.ai"
-    port: "4222"
-    protocol: "nats"
-  syslog:
-    host: "telegraf"
-    protocol: "udp"
-    port: "6514"
-  
-  # RBAC configuration
-  rbac:
-    create: true
-    clusterWide: true
-    createRole: true  # Also create Role/RoleBinding in addition to ClusterRole/ClusterRoleBinding
+
 
