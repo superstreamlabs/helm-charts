@@ -91,6 +91,6 @@ agent:
 superstreamConfig:
   image:
     repo: "superstreamlabs/superstream-connection-config"
-    tag: "latest"
+    tag: "1.0.2"
     pullPolicy: Always
     registry:

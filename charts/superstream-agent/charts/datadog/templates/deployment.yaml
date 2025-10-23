@@ -101,7 +101,7 @@ spec:
         resources:
           {{- toYaml .Values.initResources | nindent 10 }}
       - name: dd-key-fetcher
-        image: superstreamlabs/superstream-connection-config:1.0.1
+        image: superstreamlabs/superstream-connection-config:1.0.2
         imagePullPolicy: Always
         command: ["/usr/local/bin/dd-key-fetcher"]
         env:
