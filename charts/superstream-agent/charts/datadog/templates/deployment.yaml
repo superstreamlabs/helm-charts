@@ -149,11 +149,6 @@ spec:
           protocol: UDP
         
         env:
-          # - name: DD_API_KEY
-          #   valueFrom:
-          #     secretKeyRef:
-          #       name: {{ include "datadog.secretName" . }}
-          #       key: api-key
           - name: DD_API_KEY_FILE
             value: "/etc/datadog-secrets/api-key"          
           - name: DD_CLUSTER_NAME
@@ -262,7 +257,7 @@ spec:
           protocol: TCP
         
         env:
-          - name: DD_API_KEY
+          - name: DD_API_KEY_FILE
             value: "/etc/datadog-secrets/api-key"          
           - name: DD_CLUSTER_NAME
             value: {{ printf "%s-%s" .Values.global.superstreamAccountId .Values.global.agentName | quote }}
