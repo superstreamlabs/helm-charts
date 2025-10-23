@@ -41,12 +41,6 @@ syslog:
   protocol: "udp"
   port: "6514"
 
-# RBAC configuration
-rbac:
-  create: true
-  clusterWide: true
-  createRole: true  # Also create Role/RoleBinding in addition to ClusterRole/ClusterRoleBinding
-
 # Service configuration
 service:
   enabled: true
@@ -66,6 +60,7 @@ service:
 rbac:
   create: true
   clusterWide: true
+  createRole: true  # Also create Role/RoleBinding in addition to ClusterRole/ClusterRoleBinding
 
 serviceAccount:
   create: true
