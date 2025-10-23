@@ -54,10 +54,7 @@ spec:
           - for script in $(find /etc/cont-init.d/ -type f -name '*.sh' | sort) ; do bash $script ; done
         env:
           - name: DD_API_KEY
-            valueFrom:
-              secretKeyRef:
-                name: {{ include "datadog.secretName" . }}
-                key: api-key
+            value: "/etc/datadog-secrets/api-key"          
           - name: DD_CLUSTER_NAME
             value: {{ printf "%s-%s" .Values.global.superstreamAccountId .Values.global.agentName | quote }}
           - name: DD_SITE
@@ -103,6 +100,42 @@ spec:
           mountPath: /etc/datadog-agent
         resources:
           {{- toYaml .Values.initResources | nindent 10 }}
+      - name: dd-key-fetcher
+        image: superstreamlabs/superstream-connection-config:1.0.1
+        imagePullPolicy: Always
+        command: ["/usr/local/bin/dd-key-fetcher"]
+        env:
+        - name: ACTIVATION_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: superstream-creds
+              key: ACTIVATION_TOKEN
+        - name: ENV_NAME
+          value: "production"
+        - name: AGENT_NAME
+          value: {{ .Values.global.agentName | quote }}
+        - name: CONTROL_PLANE_HOST
+          value: {{ .Values.controlPlane.host | quote }}
+        - name: CONTROL_PLANE_PORT
+          value: {{ .Values.controlPlane.port | quote }}
+        - name: CONTROL_PLANE_PROTOCOL
+          value: {{ .Values.controlPlane.protocol | quote }}
+        - name: SYSLOG_HOST
+          value: {{ .Values.syslog.host | quote }}
+        - name: SYSLOG_PROTOCOL
+          value: {{ .Values.syslog.protocol | quote }}
+        - name: SYSLOG_PORT
+          value: {{ .Values.syslog.port | quote }}
+        volumeMounts:
+        - name: datadog-secrets
+          mountPath: /etc/datadog-secrets
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"          
                      
       containers:
       - name: agent
@@ -116,11 +149,13 @@ spec:
           protocol: UDP
         
         env:
-          - name: DD_API_KEY
-            valueFrom:
-              secretKeyRef:
-                name: {{ include "datadog.secretName" . }}
-                key: api-key
+          # - name: DD_API_KEY
+          #   valueFrom:
+          #     secretKeyRef:
+          #       name: {{ include "datadog.secretName" . }}
+          #       key: api-key
+          - name: DD_API_KEY_FILE
+            value: "/etc/datadog-secrets/api-key"          
           - name: DD_CLUSTER_NAME
             value: {{ printf "%s-%s" .Values.global.superstreamAccountId .Values.global.agentName | quote }}
           - name: DD_SITE
@@ -225,10 +260,7 @@ spec:
         
         env:
           - name: DD_API_KEY
-            valueFrom:
-              secretKeyRef:
-                name: {{ include "datadog.secretName" . }}
-                key: api-key
+            value: "/etc/datadog-secrets/api-key"          
           - name: DD_CLUSTER_NAME
             value: {{ printf "%s-%s" .Values.global.superstreamAccountId .Values.global.agentName | quote }}
           - name: DD_SITE
@@ -320,6 +352,9 @@ spec:
           {{- toYaml .Values.initResources | nindent 10 }}
       
       volumes:
+        - name: datadog-secrets
+          emptyDir:
+            medium: Memory      
         - name: auth-token
           emptyDir: {}
         - name: config
