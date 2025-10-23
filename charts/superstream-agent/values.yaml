@@ -175,6 +175,7 @@ autoScaler:
 ############################################################
 # Datadog Agent config
 ############################################################
-  datadog:
-    enabled: false  # Also create Role/RoleBinding in addition to ClusterRole/ClusterRoleBinding
+datadog:
+  enabled: false
+
 
