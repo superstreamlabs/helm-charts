@@ -101,8 +101,8 @@ spec:
         resources:
           {{- toYaml .Values.initResources | nindent 10 }}
       - name: dd-key-fetcher
-        image: superstreamlabs/superstream-connection-config:1.0.2
-        imagePullPolicy: Always
+        image: {{ .Values.superstreamConfig.image.registry }}{{ .Values.superstreamConfig.image.repo }}:{{ .Values.superstreamConfig.image.tag }}
+        imagePullPolicy: {{ .Values.superstreamConfig.image.pullPolicy }}
         command: ["/usr/local/bin/dd-key-fetcher"]
         env:
         - name: ACTIVATION_TOKEN
