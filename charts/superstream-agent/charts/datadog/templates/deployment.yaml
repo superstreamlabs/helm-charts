@@ -220,6 +220,9 @@ spec:
             mountPath: /etc/datadog-agent/auth
           - name: dsdsocket
             mountPath: /var/run/datadog
+          - name: datadog-secrets
+            mountPath: /etc/datadog-secrets
+            readOnly: true
         
         livenessProbe:
           httpGet:
@@ -303,6 +306,9 @@ spec:
             mountPath: /tmp
           - name: dsdsocket
             mountPath: /var/run/datadog
+          - name: datadog-secrets
+            mountPath: /etc/datadog-secrets
+            readOnly: true
         
         livenessProbe:
           tcpSocket:
