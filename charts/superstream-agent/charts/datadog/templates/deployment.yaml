@@ -141,7 +141,8 @@ spec:
       - name: agent
         image: {{ .Values.image.registry }}{{ .Values.image.repo }}:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["agent", "run"]
+        command: ["sh", "-c"]
+        args: ["export DD_API_KEY=$(cat /etc/datadog-secrets/api-key) && agent run"]
         
         ports:
         - containerPort: 8125
@@ -149,8 +150,6 @@ spec:
           protocol: UDP
         
         env:
-          - name: DD_API_KEY
-            value: "$(cat /etc/datadog-secrets/api-key)"          
           - name: DD_CLUSTER_NAME
             value: {{ printf "%s-%s" .Values.global.superstreamAccountId .Values.global.agentName | quote }}
           - name: DD_SITE
@@ -249,7 +248,8 @@ spec:
       - name: trace-agent
         image: {{ .Values.image.registry }}{{ .Values.image.repo }}:{{ .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["trace-agent", "-config=/etc/datadog-agent/datadog.yaml"]
+        command: ["sh", "-c"]
+        args: ["export DD_API_KEY=$(cat /etc/datadog-secrets/api-key) && trace-agent -config=/etc/datadog-agent/datadog.yaml"]
         
         ports:
         - containerPort: 8126
@@ -257,8 +257,6 @@ spec:
           protocol: TCP
         
         env:
-          - name: DD_API_KEY
-            value: "$(cat /etc/datadog-secrets/api-key)"          
           - name: DD_CLUSTER_NAME
             value: {{ printf "%s-%s" .Values.global.superstreamAccountId .Values.global.agentName | quote }}
           - name: DD_SITE
