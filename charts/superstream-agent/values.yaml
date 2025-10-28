@@ -172,10 +172,5 @@ autoScaler:
   tolerations: []
   affinity: {}
 
-############################################################
-# Datadog Agent config
-############################################################
-datadog:
-  enabled: false
 
 
