@@ -79,7 +79,7 @@ resources:
 # Init container resources
 initResources:
   limits:
-    memory: "128Mi"
+    memory: "200Mi"
     cpu: "100m"
   requests:
     cpu: "50m"
