@@ -25,3 +25,4 @@ Deployment Information
 2 - Superstream DataPlane's
 1 - Superstream AutoScaller
 1 - Telegraf
+1 - Datadog
