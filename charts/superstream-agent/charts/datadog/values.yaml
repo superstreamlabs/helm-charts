@@ -61,6 +61,7 @@ rbac:
   create: true
   clusterWide: true
   createRole: true  # Also create Role/RoleBinding in addition to ClusterRole/ClusterRoleBinding
+  clusterResourceNameOverride: ""  # Override ClusterRole/ClusterRoleBinding name to avoid conflicts
 
 serviceAccount:
   create: true

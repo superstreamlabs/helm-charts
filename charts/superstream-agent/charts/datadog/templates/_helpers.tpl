@@ -68,3 +68,16 @@ Create the name of the service to use
 {{- define "datadog.serviceName" -}}
 {{- include "datadog.fullname" . }}-agent
 {{- end }}
+
+{{/*
+Create the name for cluster-scoped resources (ClusterRole, ClusterRoleBinding)
+This includes both release name and namespace to avoid conflicts when multiple releases are installed
+*/}}
+{{- define "datadog.clusterResourceName" -}}
+{{- if .Values.rbac.clusterResourceNameOverride }}
+{{- .Values.rbac.clusterResourceNameOverride | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- $name := default .Chart.Name .Values.nameOverride }}
+{{- printf "%s-%s-%s" .Release.Namespace .Release.Name $name | trunc 63 | trimSuffix "-" }}
+{{- end }}
+{{- end }}
