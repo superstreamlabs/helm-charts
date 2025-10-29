@@ -24,7 +24,7 @@ spec:
         {{- include "datadog.selectorLabels" . | nindent 8 }}
         admission.datadoghq.com/enabled: "false"
       annotations:
-        rollme: {{ randAlphaNum 5 | quote }}
+        helm.sh/revision: {{ .Release.Revision | quote }}
       {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
