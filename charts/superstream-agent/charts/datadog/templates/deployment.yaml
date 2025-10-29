@@ -173,6 +173,12 @@ spec:
             value: "low"
           - name: DD_DOGSTATSD_SOCKET
             value: "/var/run/datadog/dsd.socket"
+
+          # Logs
+          - name: DD_LOGS_ENABLED
+            value: "true"
+          - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
+            value: "false"
           
           # APM
           - name: DD_APM_ENABLED
