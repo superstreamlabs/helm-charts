@@ -136,7 +136,7 @@ spec:
             cpu: "50m"
           limits:
             memory: "128Mi"
-            cpu: "100m"          
+            cpu: "100m"
                      
       containers:
       - name: agent
@@ -199,7 +199,13 @@ spec:
             valueFrom:
               fieldRef:
                 apiVersion: v1
-                fieldPath: status.hostIP            
+                fieldPath: status.hostIP  
+          - name: DD_CONTAINER_EXCLUDE
+            value: "name:.*"   
+          - name: DD_CONTAINER_EXCLUDE_METRICS
+            value: "name:.*"
+          - name: DD_CONTAINER_EXCLUDE_LOGS
+            value: "name:.*"                         
         
         resources:
           {{- toYaml .Values.resources | nindent 10 }}
@@ -211,6 +217,10 @@ spec:
             mountPath: /tmp
           - name: config
             mountPath: /etc/datadog-agent
+          - name: kubelet-config
+            mountPath: /etc/datadog-agent/conf.d/kubelet.d/conf.yaml
+            subPath: kubelet.yaml
+            readOnly: true
           - name: auth-token
             mountPath: /etc/datadog-agent/auth
           - name: dsdsocket
@@ -291,6 +301,10 @@ spec:
           - name: config
             mountPath: /etc/datadog-agent
             readOnly: true
+          - name: kubelet-config
+            mountPath: /etc/datadog-agent/conf.d/kubelet.d/conf.yaml
+            subPath: kubelet.yaml
+            readOnly: true
           - name: logdatadog
             mountPath: /var/log/datadog
           - name: auth-token
@@ -359,6 +373,9 @@ spec:
           emptyDir: {}
         - name: config
           emptyDir: {}
+        - name: kubelet-config
+          configMap:
+            name: {{ include "datadog.fullname" . }}-config
         - name: logdatadog
           emptyDir: {}
         - name: tmpdir
