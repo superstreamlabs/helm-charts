@@ -23,8 +23,9 @@ spec:
         app: datadog
         {{- include "datadog.selectorLabels" . | nindent 8 }}
         admission.datadoghq.com/enabled: "false"
-      {{- with .Values.podAnnotations }}
       annotations:
+        rollme: {{ randAlphaNum 5 | quote }}
+      {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
