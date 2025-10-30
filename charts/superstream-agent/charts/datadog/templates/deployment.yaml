@@ -25,6 +25,8 @@ spec:
         admission.datadoghq.com/enabled: "false"
       annotations:
         checksum/config: {{ toYaml .Values | sha256sum }}
+        ad.datadoghq.com/agent.logs: '[{"source":"datadog-agent","service":"datadog-agent"}]'
+        ad.datadoghq.com/trace-agent.logs: '[{"source":"datadog-agent","service":"datadog-trace-agent"}]'
       {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -179,6 +181,8 @@ spec:
             value: "true"
           - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
             value: "false"
+          - name: DD_LOGS_CONFIG_K8S_CONTAINER_USE_FILE
+            value: "true"
           
           # APM
           - name: DD_APM_ENABLED
@@ -226,6 +230,11 @@ spec:
           - name: kubelet-config
             mountPath: /etc/datadog-agent/conf.d/kubelet.d/conf.yaml
             subPath: kubelet.yaml
+            readOnly: true
+          - name: pointerdir
+            mountPath: /opt/datadog-agent/run
+          - name: logpodpath
+            mountPath: /var/log/pods
             readOnly: true
           - name: auth-token
             mountPath: /etc/datadog-agent/auth
@@ -388,4 +397,10 @@ spec:
           emptyDir: {}
         - name: dsdsocket
           emptyDir: {}
+        - name: pointerdir
+          hostPath:
+            path: /var/lib/datadog-agent/logs
+        - name: logpodpath
+          hostPath:
+            path: /var/log/pods
 {{- end }}
