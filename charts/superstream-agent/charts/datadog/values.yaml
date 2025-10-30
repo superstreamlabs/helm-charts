@@ -74,8 +74,8 @@ resources:
     memory: "512Mi"
     cpu: "500m"
   requests:
-    cpu: "100m"
-    memory: "256Mi"
+    cpu: "200m"
+    memory: "320Mi"
 
 # Init container resources
 initResources:
