@@ -10,6 +10,8 @@ enabled: true
 
 # Global image configuration
 global:
+  agentName: ""
+  superstreamAccountId: ""
   image:
     pullPolicy:
     pullSecretNames: []
