@@ -25,8 +25,6 @@ spec:
         admission.datadoghq.com/enabled: "false"
       annotations:
         checksum/config: {{ toYaml .Values | sha256sum }}
-        ad.datadoghq.com/agent.logs: '[{"source":"datadog-agent","service":"datadog-agent"}]'
-        ad.datadoghq.com/trace-agent.logs: '[{"source":"datadog-agent","service":"datadog-trace-agent"}]'
       {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -213,8 +211,6 @@ spec:
           - name: DD_CONTAINER_EXCLUDE
             value: "name:.*"   
           - name: DD_CONTAINER_EXCLUDE_METRICS
-            value: "name:.*"
-          - name: DD_CONTAINER_EXCLUDE_LOGS
             value: "name:.*"                         
         
         resources:
@@ -230,6 +226,10 @@ spec:
           - name: kubelet-config
             mountPath: /etc/datadog-agent/conf.d/kubelet.d/conf.yaml
             subPath: kubelet.yaml
+            readOnly: true
+          - name: kubelet-config
+            mountPath: /etc/datadog-agent/conf.d/datadog-agent-logs.d/conf.yaml
+            subPath: datadog-agent-logs.yaml
             readOnly: true
           - name: pointerdir
             mountPath: /opt/datadog-agent/run
