@@ -12,5 +12,12 @@ data:
     instances:
       - cadvisor_port: 0
         metrics_endpoint: ""
+  
+  datadog-agent-logs.yaml: |
+    logs:
+      - type: file
+        path: /var/log/datadog/agent.log
+        service: datadog-agent
+        source: datadog-agent
 {{- end }}
 

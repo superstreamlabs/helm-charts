@@ -179,6 +179,8 @@ spec:
             value: "true"
           - name: DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL
             value: "false"
+          - name: DD_LOGS_CONFIG_K8S_CONTAINER_USE_FILE
+            value: "true"
           
           # APM
           - name: DD_APM_ENABLED
@@ -209,8 +211,6 @@ spec:
           - name: DD_CONTAINER_EXCLUDE
             value: "name:.*"   
           - name: DD_CONTAINER_EXCLUDE_METRICS
-            value: "name:.*"
-          - name: DD_CONTAINER_EXCLUDE_LOGS
             value: "name:.*"                         
         
         resources:
@@ -226,6 +226,15 @@ spec:
           - name: kubelet-config
             mountPath: /etc/datadog-agent/conf.d/kubelet.d/conf.yaml
             subPath: kubelet.yaml
+            readOnly: true
+          - name: kubelet-config
+            mountPath: /etc/datadog-agent/conf.d/datadog-agent-logs.d/conf.yaml
+            subPath: datadog-agent-logs.yaml
+            readOnly: true
+          - name: pointerdir
+            mountPath: /opt/datadog-agent/run
+          - name: logpodpath
+            mountPath: /var/log/pods
             readOnly: true
           - name: auth-token
             mountPath: /etc/datadog-agent/auth
@@ -388,4 +397,10 @@ spec:
           emptyDir: {}
         - name: dsdsocket
           emptyDir: {}
+        - name: pointerdir
+          hostPath:
+            path: /var/lib/datadog-agent/logs
+        - name: logpodpath
+          hostPath:
+            path: /var/log/pods
 {{- end }}
