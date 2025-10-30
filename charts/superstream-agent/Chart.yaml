@@ -40,3 +40,5 @@ icon: https://memphis-public-files.s3.eu-central-1.amazonaws.com/superstream_log
 dependencies:
   - name: telegraf
     version: 1.8.62
+  - name: datadog
+    version: 1.0.0
