@@ -15,7 +15,9 @@ If release name contains chart name it will be used as a full name.
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
 {{- $name := default .Chart.Name .Values.nameOverride }}
-{{- if contains $name .Release.Name }}
+{{- if and .Values.global.superstreamAccountId .Values.global.agentName }}
+{{- printf "%s-%s-%s" .Values.global.superstreamAccountId .Values.global.agentName $name | trunc 63 | trimSuffix "-" }}
+{{- else if contains $name .Release.Name }}
 {{- .Release.Name | trunc 63 | trimSuffix "-" }}
 {{- else }}
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
