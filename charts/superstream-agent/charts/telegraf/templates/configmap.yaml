@@ -76,11 +76,6 @@ data:
       namepass = ["superstream_logs"]    
       fieldinclude = ["message"]  
       dedup_interval = "10s"   
-    [[processors.starlark]]
-      namepass = [
-        "superstream_logs"
-      ]
-      source = "def apply(metric):\n    unique_str = metric.name + str(metric.fields) + str(metric.tags)\n    random_value = str(hash(unique_str))[-8:]\n    metric.tags['eventId'] = random_value\n    return metric                                         \n"
     [[processors.dedup]]
       namepass = ["superstream_logs"]
       dedup_interval = "5m"    
