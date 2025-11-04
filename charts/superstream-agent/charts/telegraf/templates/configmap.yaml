@@ -63,8 +63,8 @@ data:
     def apply(metric):
         sev = metric.tags.get("severity")
         msg = metric.fields.get("message")
-        if sev and msg and not msg.startswith(f"[{sev}]"):
-            metric.fields["message"] = f"[{sev}] {msg}"
+        if sev and msg and not msg.startswith("[" + sev + "]"):
+            metric.fields["message"] = "[" + sev + "] " + msg
         return metric
       '''
       
