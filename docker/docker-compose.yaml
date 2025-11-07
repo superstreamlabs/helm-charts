@@ -127,10 +127,6 @@ configs:
         dedup_interval = "10s"
 
       [[processors.starlark]]
-        namepass = ["superstream_logs"]
-        source = "def apply(metric):\n    unique_str = metric.name + str(metric.fields) + str(metric.tags)\n    random_value = str(hash(unique_str))[-8:]\n    metric.tags['eventId'] = random_value\n    return metric\n"
-
-      [[processors.starlark]]
         source = '''
       def apply(metric):
           level = metric.fields.get('level')

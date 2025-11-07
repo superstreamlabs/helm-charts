@@ -58,29 +58,34 @@ data:
       [processors.converter.fields]
         tag = ["appname", "severity", "account","hostname"]
     [[processors.starlark]]
-      namepass = [
-        "superstream_logs"
-      ]    
+      namepass = ["superstream_logs"]
+      source = '''
+    def apply(metric):
+        sev = metric.tags.get("severity")
+        msg = metric.fields.get("message")
+        if sev and msg and not msg.startswith("[" + sev + "]"):
+            metric.fields["message"] = "[" + sev + "] " + msg
+        return metric
+      '''
+      
+    [[processors.starlark]]
+      namepass = ["superstream_logs"]
       source = '''
     def apply(metric):
         severity = metric.tags.get('severity')
         if severity == "ERR":
-            metric.tags['level'] = "error" 
+            metric.tags['level'] = "error"
         elif severity == "WRN":
-            metric.tags['level'] = "warning"            
+            metric.tags['level'] = "warning"
         elif severity == "INF":
             metric.tags['level'] = "info"
         return metric
-      ''' 
+      '''
+
         [[processors.dedup]]
       namepass = ["superstream_logs"]    
       fieldinclude = ["message"]  
       dedup_interval = "10s"   
-    [[processors.starlark]]
-      namepass = [
-        "superstream_logs"
-      ]
-      source = "def apply(metric):\n    unique_str = metric.name + str(metric.fields) + str(metric.tags)\n    random_value = str(hash(unique_str))[-8:]\n    metric.tags['eventId'] = random_value\n    return metric                                         \n"
     [[processors.dedup]]
       namepass = ["superstream_logs"]
       dedup_interval = "5m"    
