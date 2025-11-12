@@ -1,4 +1,21 @@
 version: '3.8'
+
+# Shared environment variable templates
+x-common-env: &common-env
+  ACTIVATION_TOKEN: ${ACTIVATION_TOKEN}
+  AGENT_NAME: ${AGENT_NAME}
+  ACCOUNT_ID: ${ACCOUNT_ID}
+
+x-control-plane-env: &control-plane-env
+  CONTROL_PLANE_HOST: broker.superstream.ai
+  CONTROL_PLANE_PORT: 4222
+  CONTROL_PLANE_PROTOCOL: nats
+
+x-syslog-env: &syslog-env
+  SYSLOG_HOST: telegraf
+  SYSLOG_PORT: 6514
+  SYSLOG_PROTOCOL: udp
+
 services:  
   data-plane:
     image: superstreamlabs/superstream-data-plane-be:latest
@@ -6,18 +23,13 @@ services:
     restart: always
     depends_on:
       - telegraf
+      - datadog-agent
     labels:
       - "com.centurylinklabs.watchtower.enable=true"      
     environment:
-      - ENV_NAME=${AGENT_NAME}
-      - ACTIVATION_TOKEN
-      - CONTROL_PLANE_HOST=broker.superstream.ai
-      - CONTROL_PLANE_PORT=4222
-      - CONTROL_PLANE_PROTOCOL=nats
-      - SYSLOG_HOST=telegraf
-      - SYSLOG_PORT=6514
-      - SYSLOG_PROTOCOL=udp
-      - CH_SKIP=false
+      <<: [*common-env, *control-plane-env, *syslog-env]
+      ENV_NAME: ${AGENT_NAME}
+      CH_SKIP: false
 
   auto-scaler:
     image: superstreamlabs/superstream-kafka-auto-scaler:latest
@@ -26,29 +38,251 @@ services:
     labels:
       - "com.centurylinklabs.watchtower.enable=true"    
     environment:
-      - ENV_NAME=${AGENT_NAME}
-      - ACTIVATION_TOKEN
-      - CONTROL_PLANE_HOST=broker.superstream.ai
-      - CONTROL_PLANE_PORT=4222
-      - CONTROL_PLANE_PROTOCOL=nats
-      - SYSLOG_HOST=telegraf
-      - SYSLOG_PORT=6514
-      - SYSLOG_PROTOCOL=utp 
+      <<: [*common-env, *control-plane-env, *syslog-env]
+      ENV_NAME: ${AGENT_NAME} 
   watchtower:
     image: containrrr/watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --interval 300
+
+  datadog-init:
+    image: superstreamlabs/superstream-connection-config:latest
+    pull_policy: always
+    restart: "no"
+    environment:
+      <<: [*common-env, *control-plane-env, *syslog-env]
+      ENV_NAME: production
+    volumes:
+      - datadog-config:/etc/datadog-agent
+      - datadog-secrets:/etc/datadog-secrets
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        echo "Starting Datadog initialization..."
+        echo "Fetching Datadog API key..."
+        /usr/local/bin/dd-key-fetcher || { echo "Failed to fetch Datadog API key"; exit 1; }
+        if [ -f /etc/datadog-secrets/api-key ]; then
+          echo "API key successfully fetched"
+        else
+          echo "ERROR: API key file not found at /etc/datadog-secrets/api-key"
+          exit 1
+        fi
+        echo "Generating Datadog YAML configuration..."
+        /usr/local/bin/yaml-generator || { echo "Failed to generate Datadog config"; exit 1; }
+        echo "Datadog initialization complete"
+        ls -la /etc/datadog-secrets/
+        ls -la /etc/datadog-agent/ 2>/dev/null || echo "No config files yet"
+
+  datadog-agent:
+    image: gcr.io/datadoghq/agent:7.71.1-jmx
+    restart: always
+    depends_on:
+      datadog-init:
+        condition: service_completed_successfully
+    ports:
+      - "8125:8125/udp"  # DogStatsD
+      - "8126:8126/tcp"  # APM Trace Agent
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -e
+        echo "Starting Datadog agent..."
+        
+        # Wait for API key file to be available
+        MAX_WAIT=30
+        COUNTER=0
+        while [ ! -f /etc/datadog-secrets/api-key ] && [ $$COUNTER -lt $$MAX_WAIT ]; do
+          echo "Waiting for API key file... ($$COUNTER/$$MAX_WAIT)"
+          sleep 1
+          COUNTER=$$((COUNTER + 1))
+        done
+        
+        if [ -f /etc/datadog-secrets/api-key ]; then
+          echo "API key file found, loading..."
+          export DD_API_KEY=$$(cat /etc/datadog-secrets/api-key)
+          
+          if [ -z "$$DD_API_KEY" ]; then
+            echo "ERROR: API key file is empty"
+            exit 1
+          fi
+          
+          echo "API key loaded successfully (length: $${#DD_API_KEY})"
+        else
+          echo "ERROR: API key file not found after waiting"
+          exit 1
+        fi
+        
+        echo "Starting Datadog agent..."
+        exec /bin/entrypoint.sh
+    environment:
+      # Core Datadog configuration
+      - DD_SITE=${DD_SITE:-us5.datadoghq.com}
+      - DD_CLUSTER_NAME=${ACCOUNT_ID}-${AGENT_NAME}
+      - DD_HOSTNAME=${ACCOUNT_ID}-${AGENT_NAME}
+      - DD_LOG_LEVEL=INFO
+      
+      # DogStatsD configuration
+      - DD_DOGSTATSD_PORT=8125
+      - DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true
+      - DD_DOGSTATSD_TAG_CARDINALITY=low
+      
+      # APM configuration
+      - DD_APM_ENABLED=true
+      - DD_APM_NON_LOCAL_TRAFFIC=true
+      - DD_APM_RECEIVER_PORT=8126
+      
+      # Logs configuration
+      - DD_LOGS_ENABLED=true
+      - DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=false
+      
+      # Container configuration
+      - DD_CONTAINER_EXCLUDE=name:.*
+      - DD_CONTAINER_EXCLUDE_METRICS=name:.*
+      - DD_CONTAINER_IMAGE_ENABLED=true
+      
+      # Orchestrator configuration
+      - DD_ORCHESTRATOR_EXPLORER_ENABLED=false
+      - DD_IGNORE_AUTOCONF=redisdb kubernetes_state kubelet
+    volumes:
+      - datadog-config:/etc/datadog-agent
+      - datadog-secrets:/etc/datadog-secrets:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /proc/:/host/proc/:ro
+      - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
+    labels:
+      com.datadoghq.ad.logs: '[{"source": "datadog-agent", "service": "datadog-agent"}]'
+
+  datadog-config-monitor:
+    image: superstreamlabs/superstream-connection-config:latest
+    pull_policy: always
+    restart: always
+    depends_on:
+      datadog-agent:
+        condition: service_started
+      telegraf:
+        condition: service_started
+    environment:
+      <<: [*common-env, *control-plane-env, *syslog-env]
+      ENV_NAME: production
+      DOCKER_MODE: true
+      INIT_CONTAINER_NAME: superstream-datadog-init-1
+      AGENT_CONTAINER_NAME: superstream-datadog-agent-1
+    volumes:
+      - datadog-config:/etc/datadog-agent
+      - /var/run/docker.sock:/var/run/docker.sock
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        # Syslog function - sends to telegraf and stdout
+        log() {
+          MSG="$$1"; SEV="$$2"; PRI=14
+          [ "$$SEV" = "error" ] && PRI=11 && SEV_CODE="ERR"
+          [ "$$SEV" = "warning" ] && PRI=12 && SEV_CODE="WRN"
+          [ "$$SEV" = "info" ] && SEV_CODE="INF"
+          echo "[$$SEV] $$MSG"
+          TS=$$(date +"%Y-%m-%dT%H:%M:%S%z" | sed 's/\([0-9][0-9]\)$$/:\1/')
+          echo "<$$PRI>$$TS datadog-config-monitor config-monitor[$$$$]: [account: $${ACCOUNT_ID:-unknown}][$$SEV_CODE] $$MSG" | nc -u -w1 telegraf 6514 2>/dev/null || true
+        }
+        
+        # Find container by pattern
+        find_container() { docker ps -a --format '{{.Names}}' 2>/dev/null | grep "$$1" | grep -v "$$2" | head -1; }
+        
+        # Install tools and start monitoring
+        if [ ! -f /var/run/secrets/kubernetes.io/serviceaccount/token ]; then
+          command -v docker >/dev/null || apk add --no-cache docker-cli 2>/dev/null || true
+          command -v nc >/dev/null || apk add --no-cache netcat-openbsd 2>/dev/null || true
+          
+          log "Configuration monitoring started - checking every 300 seconds" "info"
+          
+          # Detect containers
+          INIT=$$(find_container "datadog-init" "^$$")
+          AGENT=$$(find_container "datadog-agent" "init")
+          [ -n "$$INIT" ] && log "Found init: $$INIT" "info"
+          [ -n "$$AGENT" ] && log "Found agent: $$AGENT" "info" || log "Agent container not found - will retry" "warning"
+          
+          OLD_HASH=""
+          while true; do
+            log "Checking for configuration updates" "info"
+            
+            # Run yaml-generator and capture result
+            if /usr/local/bin/yaml-generator 2>&1; then
+              log "yaml-generator executed successfully" "info"
+            else
+              log "yaml-generator execution failed" "warning"
+            fi
+            
+            # Calculate config hash
+            if [ -d /etc/datadog-agent/conf.d ]; then
+              NEW_HASH=$$(find /etc/datadog-agent/conf.d -type f -exec md5sum {} \; 2>/dev/null | sort | md5sum | cut -d' ' -f1)
+              log "Config hash: $$NEW_HASH" "info"
+            else
+              NEW_HASH=""
+              log "Config directory not found" "warning"
+            fi
+            
+            # Check for changes (including first run where OLD_HASH is empty but NEW_HASH exists)
+            if [ -n "$$NEW_HASH" ] && [ "$$OLD_HASH" != "$$NEW_HASH" ]; then
+              if [ -z "$$OLD_HASH" ]; then
+                log "Initial configuration detected - skipping restart" "info"
+              else
+                log "Configuration changed (old: $$OLD_HASH, new: $$NEW_HASH) - applying updates" "info"
+                
+                # Re-detect if needed
+                [ -z "$$INIT" ] && INIT=$$(find_container "datadog-init" "^$$")
+                [ -z "$$AGENT" ] && AGENT=$$(find_container "datadog-agent" "init")
+                
+                # Restart init
+                if [ -n "$$INIT" ]; then
+                  log "Starting init container: $$INIT" "info"
+                  if docker start $$INIT 2>&1; then
+                    sleep 5
+                    for i in $$(seq 1 30); do
+                      STATUS=$$(docker inspect -f '{{.State.Status}}' $$INIT 2>/dev/null)
+                      [ "$$STATUS" = "exited" ] && log "Init completed" "info" && break
+                      sleep 2
+                    done
+                  else
+                    log "Init start failed" "error"
+                  fi
+                else
+                  log "Init container not found" "error"
+                fi
+                
+                # Restart agent
+                if [ -n "$$AGENT" ]; then
+                  log "Restarting agent container: $$AGENT" "info"
+                  if docker restart $$AGENT 2>&1; then
+                    log "Agent restarted successfully" "info"
+                  else
+                    log "Agent restart failed" "error"
+                  fi
+                else
+                  log "Agent container not found" "error"
+                fi
+                
+                log "Configuration update completed" "info"
+              fi
+            else
+              log "No configuration changes detected" "info"
+            fi
+            
+            OLD_HASH=$$NEW_HASH
+            sleep 300
+          done
+        else
+          exec /usr/local/bin/config-monitor
+        fi
+
   telegraf:
     image: library/telegraf:1.32-alpine
     restart: always
     ports:
       - "6514:6514/udp"  # For socket_listener input
     environment: 
-      - ACTIVATION_TOKEN
-      - ACCOUNT_ID
-      - AGENT_NAME
-      - TELEGRAF_CONFIG_PATH=/etc/telegraf/telegraf.conf
+      <<: *common-env
+      TELEGRAF_CONFIG_PATH: /etc/telegraf/telegraf.conf
     configs:
       - source: telegraf_config
         target: /etc/telegraf/telegraf.conf
@@ -106,6 +340,17 @@ configs:
         namepass = ["superstream_logs"]
         [processors.converter.fields]
           tag = ["appname", "severity", "account","hostname"]
+
+      [[processors.starlark]]  
+        namepass = ["superstream_logs"]
+        source = '''
+      def apply(metric):
+          sev = metric.tags.get("severity")
+          msg = metric.fields.get("message")
+          if sev and msg and not msg.startswith("[" + sev + "]"):
+              metric.fields["message"] = "[" + sev + "] " + msg
+          return metric
+        '''
 
       [[processors.starlark]]
         namepass = ["superstream_logs"]
@@ -180,3 +425,9 @@ configs:
           accountId = "$ACCOUNT_ID"
           engineName = "$AGENT_NAME"
           agentName = "$AGENT_NAME"
+
+volumes:
+  datadog-config:
+    driver: local
+  datadog-secrets:
+    driver: local
