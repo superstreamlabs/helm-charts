@@ -7,7 +7,7 @@ x-common-env: &common-env
   ACCOUNT_ID: ${ACCOUNT_ID}
 
 x-control-plane-env: &control-plane-env
-  CONTROL_PLANE_HOST: broker.superstream.ai
+  CONTROL_PLANE_HOST: broker.stg.aws.superstream.ai
   CONTROL_PLANE_PORT: 4222
   CONTROL_PLANE_PROTOCOL: nats
 
