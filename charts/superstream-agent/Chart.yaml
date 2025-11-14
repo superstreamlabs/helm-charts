@@ -5,8 +5,8 @@ annotations:
   dataPlaneVersion: "1.1.941"
   autoScalerVersion: "1.1.902"
   artifacthub.io/changes: |-
-    - kind: changed
-      description: Bump Superstream-Data-Plane to 1.1.941
+    - kind: added
+      description: Add Datadog Autoscaling
 name: superstream-agent
 description: Superstream Official Helm chart
 home: https://superstream.ai
