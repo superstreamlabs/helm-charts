@@ -11,6 +11,6 @@ rules:
   resources: ["pods"]
   verbs: ["get", "list", "delete"]
 - apiGroups: ["apps"]
-  resources: ["deployments", "deployments/scale"]
-  verbs: ["get", "patch", "update"]  
+  resources: ["deployments", "replicasets"]  # ← Add replicasets here
+  verbs: ["get", "update", "patch"]
 {{- end }}
