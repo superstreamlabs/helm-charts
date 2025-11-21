@@ -21,8 +21,6 @@ services:
     image: superstreamlabs/superstream-data-plane-be:latest
     pull_policy: always
     restart: always
-    # ports:
-    #   - "7777:7777" 
     deploy:
       resources:
         limits:
@@ -46,8 +44,6 @@ services:
     image: superstreamlabs/superstream-kafka-auto-scaler:latest
     pull_policy: always
     restart: always
-    # ports:
-    #   - "7778:7777" 
     deploy:
       resources:
         limits:
