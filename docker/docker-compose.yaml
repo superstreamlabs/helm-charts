@@ -21,6 +21,14 @@ services:
     image: superstreamlabs/superstream-data-plane-be:latest
     pull_policy: always
     restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.2'
+          memory: 256M        
     depends_on:
       - telegraf
       - datadog-agent
@@ -29,17 +37,27 @@ services:
     environment:
       <<: [*common-env, *control-plane-env, *syslog-env]
       ENV_NAME: ${AGENT_NAME}
+      PORT: 7777
       CH_SKIP: false
 
   auto-scaler:
     image: superstreamlabs/superstream-kafka-auto-scaler:latest
     pull_policy: always
     restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.2'
+          memory: 256M          
     labels:
       - "com.centurylinklabs.watchtower.enable=true"    
     environment:
       <<: [*common-env, *control-plane-env, *syslog-env]
       ENV_NAME: ${AGENT_NAME} 
+      PORT: 7777
   watchtower:
     image: containrrr/watchtower
     volumes:
@@ -401,6 +419,19 @@ configs:
         [outputs.loki.http_headers]
           Authorization = "$ACTIVATION_TOKEN"
 
+      [[outputs.http]]
+        data_format = "prometheusremotewrite"
+        timeout = "15s"
+        method = "POST"
+        namedrop = [
+          "superstream_logs",
+          "telegraf_logs",
+          "internal"
+        ]
+        url = "https://prometheus.mgmt.superstream.ai/api/v1/write"  
+        [outputs.http.headers]
+          Authorization = "$ACTIVATION_TOKEN"
+
       [[inputs.tail]]
         files = ["/tmp/telegraf.log"]
         from_beginning = false
@@ -418,6 +449,16 @@ configs:
           engineName = "$AGENT_NAME"
           agentName = "$AGENT_NAME"
           appname = "telegraf"
+
+      [[inputs.prometheus]]
+        urls = [
+          "http://data-plane:7777/monitoring/metrics",
+          "http://auto-scaler:7777/monitoring/metrics"
+        ]
+        [inputs.prometheus.tags]
+          accountId = "$ACCOUNT_ID"
+          engineName = "$AGENT_NAME"
+          agentName = "$AGENT_NAME"
 
       [[inputs.internal]]
         collect_memstats = true
