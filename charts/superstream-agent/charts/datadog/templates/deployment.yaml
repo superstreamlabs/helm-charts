@@ -57,7 +57,7 @@ spec:
           - name: DD_API_KEY
             value: "/etc/datadog-secrets/api-key"          
           - name: DD_CLUSTER_NAME
-            value: {{ printf "%s-%s" .Values.global.superstreamAccountId .Values.global.agentName | quote }}
+            value: {{ printf "%s-%s" (typeIs "string" .Values.global.superstreamAccountId | ternary .Values.global.superstreamAccountId (printf "%.0f" .Values.global.superstreamAccountId)) .Values.global.agentName | quote }}
           - name: DD_SITE
             value: {{ .Values.site | quote }}
           - name: KUBERNETES
@@ -152,11 +152,11 @@ spec:
         
         env:
           - name: DD_CLUSTER_NAME
-            value: {{ printf "%s-%s" .Values.global.superstreamAccountId .Values.global.agentName | quote }}
+            value: {{ printf "%s-%s" (typeIs "string" .Values.global.superstreamAccountId | ternary .Values.global.superstreamAccountId (printf "%.0f" .Values.global.superstreamAccountId)) .Values.global.agentName | quote }}
           - name: DD_SITE
             value: {{ .Values.site | quote }}
           - name: DD_HOSTNAME
-            value: {{ printf "%s-%s" .Values.global.superstreamAccountId .Values.global.agentName | quote }}
+            value: {{ printf "%s-%s" (typeIs "string" .Values.global.superstreamAccountId | ternary .Values.global.superstreamAccountId (printf "%.0f" .Values.global.superstreamAccountId)) .Values.global.agentName | quote }}
           - name: KUBERNETES
             value: "yes"
           - name: DD_LOG_LEVEL
@@ -282,7 +282,7 @@ spec:
         
         env:
           - name: DD_CLUSTER_NAME
-            value: {{ printf "%s-%s" .Values.global.superstreamAccountId .Values.global.agentName | quote }}
+            value: {{ printf "%s-%s" (typeIs "string" .Values.global.superstreamAccountId | ternary .Values.global.superstreamAccountId (printf "%.0f" .Values.global.superstreamAccountId)) .Values.global.agentName | quote }}
           - name: DD_SITE
             value: {{ .Values.site | quote }}
           - name: DD_LOG_LEVEL
