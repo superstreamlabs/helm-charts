@@ -11,6 +11,41 @@ entries:
       licenses: Superstream Labs Business Source License 1.0
     apiVersion: v2
     appVersion: 1.1.949
+    created: "2025-12-09T08:42:17.978350799Z"
+    dependencies:
+    - name: telegraf
+      repository: ""
+      version: 1.8.62
+    - name: datadog
+      repository: ""
+      version: 1.0.0
+    description: Superstream Official Helm chart
+    digest: f84ace8d5c90719419440c793b0ba28a468ed70ece0a09d7c44cf122b8cfcd3c
+    home: https://superstream.ai
+    icon: https://memphis-public-files.s3.eu-central-1.amazonaws.com/superstream_logo.png
+    keywords:
+    - data streaming
+    - cost reduction
+    - superstream
+    - kafka
+    maintainers:
+    - name: Superstream Labs
+      url: https://superstream.ai
+    name: superstream-agent
+    type: application
+    urls:
+    - https://github.com/superstreamlabs/helm-charts/releases/download/superstream-agent-0.1.84/superstream-agent-0.1.84.tgz
+    version: 0.1.84
+  - annotations:
+      artifacthub.io/changes: |-
+        - kind: fixed
+          description: Fix the agent name issue
+      autoScalerVersion: 1.1.904
+      category: Streaming and Messaging
+      dataPlaneVersion: 1.1.949
+      licenses: Superstream Labs Business Source License 1.0
+    apiVersion: v2
+    appVersion: 1.1.949
     created: "2025-12-09T08:35:11.651624502Z"
     dependencies:
     - name: telegraf
@@ -3662,4 +3697,4 @@ entries:
     urls:
     - https://github.com/superstreamlabs/helm-charts/releases/download/superstream-agent-0.0.1/superstream-agent-0.0.1.tgz
     version: 0.0.1
-generated: "2025-12-09T08:35:11.651915929Z"
+generated: "2025-12-09T08:42:17.978692394Z"
