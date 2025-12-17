@@ -30,7 +30,131 @@ jobs:
       env:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
+    - name: Get versions
+      id: version
+      run: |
+        echo "chart_version=$(grep '^version:' charts/superstream-agent/Chart.yaml | awk '{print $2}')" >> $GITHUB_OUTPUT
+        echo "app_version=$(grep '^appVersion:' charts/superstream-agent/Chart.yaml | awk '{print $2}' | tr -d '\"')" >> $GITHUB_OUTPUT
+
     - name: Run chart-releaser
       uses: helm/chart-releaser-action@v1.6.0
       env:
         CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+    - name: Notify Slack on Release
+      if: success()
+      uses: slackapi/slack-github-action@v2.0.0
+      with:
+        webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+        webhook-type: incoming-webhook
+        payload: |
+          {
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "🚀 New Helm Chart Released - v${{ steps.version.outputs.chart_version }}",
+                  "emoji": true
+                }
+              },
+              {
+                "type": "section",
+                "fields": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Chart:*\nsuperstream-agent"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Chart Version:*\n${{ steps.version.outputs.chart_version }}"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*App Version:*\n${{ steps.version.outputs.app_version }}"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Repository:*\n<${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>"
+                  }
+                ]
+              },
+              {
+                "type": "actions",
+                "elements": [
+                  {
+                    "type": "button",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "View Release",
+                      "emoji": true
+                    },
+                    "url": "${{ github.server_url }}/${{ github.repository }}/releases/tag/superstream-agent-${{ steps.version.outputs.chart_version }}"
+                  }
+                ]
+              }
+            ]
+          }
+
+    - name: Notify Slack on Failure
+      if: failure()
+      uses: slackapi/slack-github-action@v2.0.0
+      with:
+        webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+        webhook-type: incoming-webhook
+        payload: |
+          {
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "❌ Helm Chart Release Failed - v${{ steps.version.outputs.chart_version }}",
+                  "emoji": true
+                }
+              },
+              {
+                "type": "section",
+                "fields": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Chart:*\nsuperstream-agent"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Chart Version:*\n${{ steps.version.outputs.chart_version }}"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*App Version:*\n${{ steps.version.outputs.app_version }}"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Triggered by:*\n${{ github.actor }}"
+                  }
+                ]
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*Repository:* <${{ github.server_url }}/${{ github.repository }}|${{ github.repository }}>"
+                }
+              },
+              {
+                "type": "actions",
+                "elements": [
+                  {
+                    "type": "button",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "View Workflow Run",
+                      "emoji": true
+                    },
+                    "style": "danger",
+                    "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  }
+                ]
+              }
+            ]
+          }
